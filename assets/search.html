@@ -73,11 +73,11 @@
             if(http.readyState == 4 && http.status == 200) {
                 response = JSON.parse(http.responseText)
                 resultarray = response.Extra
-                console.log('result array got:',resultarray)
+                
                 resultTable(resultarray)
             }
         }
-        console.log('Sending hhtlp request')
+        
         http.send(params);
       }
       function resultTable(resultarray) {
