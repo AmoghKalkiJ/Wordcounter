@@ -7,18 +7,23 @@ import (
 	"html/template"
 	"io/ioutil"
 	"net/http"
+	"os"
+	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
 )
 
-const search_page = "/home/root1/go/src/Wordcounter/assets/search.html"
+var (
+	path        = os.Getenv("GOPATH")
+	search_page = path + "/src/Wordcounter/assets/search.html"
+)
 
 // web portal
 func Portal(w http.ResponseWriter, r *http.Request) {
 
-	login_tpl := template.Must(template.ParseFiles(search_page))
-	login_tpl.Execute(w, struct{ Success bool }{true})
+	input_tpl := template.Must(template.ParseFiles(search_page))
+	input_tpl.Execute(w, struct{ Success bool }{true})
 
 }
 
@@ -34,8 +39,7 @@ func Wordcounter(w http.ResponseWriter, r *http.Request) {
 		url = "http://" + url
 	}
 	resp, err := http.Get(url)
-	fmt.Printf("got response %v", resp)
-	if resp == nil {
+	if reflect.ValueOf(resp).IsNil() {
 		w.WriteHeader(http.StatusNotAcceptable)
 		w.Write([]byte("Invalid URL"))
 		return
@@ -51,7 +55,7 @@ func Wordcounter(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		w.WriteHeader(http.StatusNotAcceptable)
-
+		return
 	}
 	z := html.NewTokenizerFragment(resp.Body, "body")
 	stt := z.Token()
@@ -88,7 +92,6 @@ loop:
 		result = append(result, a+":"+strconv.Itoa(count))
 	}
 
-	fmt.Printf("result: %+v", result)
 	ReturnJSONAPISuccess(w, result)
 }
 
